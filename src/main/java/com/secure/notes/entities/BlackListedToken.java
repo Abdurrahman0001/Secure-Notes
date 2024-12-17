@@ -1,4 +1,4 @@
-package com.secure.notes.models;
+package com.secure.notes.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -15,8 +15,5 @@ public class BlackListedToken {
 
     @Column(nullable = false, unique = true)
     private String token;
-
-    @Column(nullable = false)
-    private Date expirationDate;
 
 }

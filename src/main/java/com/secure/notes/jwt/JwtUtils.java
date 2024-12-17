@@ -1,6 +1,7 @@
 package com.secure.notes.jwt;
 
 
+import com.secure.notes.repository.BlackListRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -10,7 +11,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,9 @@ public class JwtUtils {
     private String jwtSecret;
     @Value("${spring.app.jwtExpirationMs}")
     private Long jwtExpirationMs;
+
+    @Autowired
+    private BlackListRepository blackListRepository;
 
     public String getJwtFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
@@ -87,4 +91,14 @@ public class JwtUtils {
     }
 
 
+    public boolean isBlacklisted(String jwt) {
+
+       if( blackListRepository.existsByToken(jwt)){
+           logger.info("Invalid Token, Token is blacklisted");
+           return true;
+       } else {
+           logger.info("Token Authenticated");
+       }
+       return false;
+    }
 }

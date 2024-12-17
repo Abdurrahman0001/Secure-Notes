@@ -1,22 +1,25 @@
 package com.secure.notes.services;
 
 import com.secure.notes.dtos.UserDTO;
-import com.secure.notes.models.User;
+import com.secure.notes.entities.User;
+import com.secure.notes.models.ResponseObject;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface UserService {
 
-    List<User> getAllUsers();
-    void updateUserRole(Long userId,String roleName);
-    UserDTO getUserById(Long id);
+    ResponseEntity<ResponseObject> getAllUsers();
 
-    void deleteUserById(Long userId);
+    ResponseEntity<ResponseObject> updateUserRole(Long userId, String roleName);
 
-    UserDTO createUser(User user);
+    ResponseEntity<ResponseObject> getUserById(Long id);
 
-    UserDTO getUserByIdForAdmin(Long id);
+    ResponseEntity<ResponseObject> deleteUserById(Long userId);
 
-    ResponseEntity<String> changePassword(User user);
+    ResponseEntity<ResponseObject> createUser(UserDTO userDTO);
+
+    ResponseEntity<ResponseObject> getUserByIdForAdmin(Long id);
+
+    ResponseEntity<ResponseObject> changePassword(User user);
 }

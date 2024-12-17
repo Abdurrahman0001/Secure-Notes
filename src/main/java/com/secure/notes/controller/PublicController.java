@@ -1,102 +1,56 @@
 package com.secure.notes.controller;
 
 import com.secure.notes.dtos.UserDTO;
-import com.secure.notes.jwt.JwtUtils;
-import com.secure.notes.jwt.LoginRequest;
-import com.secure.notes.jwt.LoginResponse;
-import com.secure.notes.models.User;
-import com.secure.notes.services.UserService;
-import com.secure.notes.services.impl.BlacklistService;
+import com.secure.notes.models.LoginRequest;
+import com.secure.notes.models.ResponseObject;
+import com.secure.notes.services.UserAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.Claims;
-
-
+@Log4j2
 @RestController
 @RequestMapping("/api/public")
 public class PublicController {
 
-    @Autowired
-    UserService userService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    private BlacklistService blacklistService;
+    private final UserAuthenticationService userAuthenticationService;
+
+    public PublicController(UserAuthenticationService userAuthenticationService) {
+        this.userAuthenticationService = userAuthenticationService;
+    }
+
 
     @PostMapping("/create-user")
-    public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+    public ResponseEntity<ResponseObject> createUser(@RequestBody UserDTO userDTO) {
+
+        log.info("URL : {} , MethodType : {} , RequestBody : {} ", "api/public/create-user", "POST", userDTO);
+        ResponseEntity<ResponseObject> response = userAuthenticationService.saveUser(userDTO);
+        log.info("URL : {} , MethodType : {} , PathVariable : {} , ResponseBody : {} ", "/api/public/create-user", "POST", userDTO, response);
+        return response;
 
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication;
-        try {
-            authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
-        } catch (AuthenticationException exception) {
-            Map<String, Object> body = new HashMap<>();
-            body.put("message", "Bad Credentials");
-            body.put("status", false);
-            return new ResponseEntity<Object>(body, HttpStatus.NOT_FOUND);
-        }
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    @PostMapping("/signin/user")
+    public ResponseEntity<ResponseObject> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        log.info("URL : {} , MethodType : {} , RequestBody : {} ", "api/public/signin/user", "POST", loginRequest);
+        ResponseEntity<ResponseObject> response = userAuthenticationService.signInUser(loginRequest);
+        log.info("URL : {} , MethodType : {} , PathVariable : {} , ResponseBody : {} ", "/api/public/signin/user", "POST", loginRequest, response);
+        return response;
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        String token = jwtUtils.generateTokenFromUsername(userDetails);
-
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-
-        LoginResponse loginResponse = new LoginResponse(token, userDetails.getUsername(), roles);
-        return ResponseEntity.ok(loginResponse);
     }
 
-    @PostMapping("/signout")
-    public ResponseEntity<?> signOut(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7); // Remove "Bearer "
-        Date expirationDate = Jwts.parser().setSigningKey(jwtUtils.key()).build().parseClaimsJws(token).getPayload().getExpiration();
-        blacklistService.blacklistToken(token, expirationDate);
-        return ResponseEntity.ok("Signed out successfully.");
+    @PostMapping("/signout/user")
+    public ResponseEntity<ResponseObject> signOut(HttpServletRequest request) {
+
+        log.info("URL : {} , MethodType : {} , RequestBody : {} ", "api/public/signout/user", "POST", request);
+        ResponseEntity<ResponseObject> response = userAuthenticationService.signOutUser(request);
+        log.info("URL : {} , MethodType : {} , RequestBody : {} , ResponseBody : {} ", "/api/public/signout/user", "POST", request, response);
+        return response;
+
     }
-
-    public Date extractExpiration(String token) {
-        // Assuming `jwtUtils.key()` provides the key used to sign the token.
-        Key key = jwtUtils.key();
-
-        Claims claims = Jwts.parser()
-                .setSigningKey(key) // Set the key used to sign the JWT
-                .build()
-                .parseClaimsJws(token) // Parse the token
-                .getBody(); // Get the claims body
-
-        return claims.getExpiration(); // Extract the expiration date
-    }
-
 
 }

@@ -1,4 +1,4 @@
-package com.secure.notes.jwt;
+package com.secure.notes.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

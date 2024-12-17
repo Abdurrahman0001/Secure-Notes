@@ -1,55 +1,67 @@
 package com.secure.notes.controller;
 
 
-import com.secure.notes.dtos.UserDTO;
-import com.secure.notes.models.User;
+import com.secure.notes.models.ResponseObject;
 import com.secure.notes.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
+@Log4j2
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
+
+    public AdminController(UserService userService) {
+        this.userService = userService;
+    }
 
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
-        return new ResponseEntity<>(userService.getUserByIdForAdmin(id), HttpStatus.OK);
+    @GetMapping("/user/{id}/get")
+    public ResponseEntity<ResponseObject> getUser(@PathVariable Long id) {
+
+        log.info("URL : {} , MethodType : {} , PathVariable : {} ", "/api/admin/user/id/get", "GET", id);
+        ResponseEntity<ResponseObject> response = userService.getUserByIdForAdmin(id);
+        log.info("URL : {} , MethodType : {} , ResponseBody : {} ", "/api/admin/user/id/get", "GET", response);
+        return response;
     }
 
     /*
         @PreAuthorize("hasRole('ADMIN')")
     */
-    @GetMapping("/getusers")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    @GetMapping("/users/get")
+    public ResponseEntity<ResponseObject> getAllUsers() {
+        log.info("URL : {} , MethodType : {} ", "/api/admin/users/get", "GET");
+        ResponseEntity<ResponseObject> response = userService.getAllUsers();
+
+        log.info("URL : {} , MethodType : {} , ResponseBody : {} ", "/api/admin/users/get", "GET", response);
+        return response;
     }
 
 
-    @PutMapping("/update-role")
-    public ResponseEntity<String> updateUserRole(@RequestParam Long userId,
-                                                 @RequestParam String roleName) {
-        userService.updateUserRole(userId, roleName);
-        return ResponseEntity.ok("User role updated");
+    @PutMapping("/role/update")
+    public ResponseEntity<ResponseObject> updateUserRole(@RequestParam Long userId,
+                                                         @RequestParam String roleName) {
+        log.info("URL : {} , MethodType : {} , RequestParameter1 : {} , RequestParameter2 : {} ", "/api/admin/role/update", "PUT", userId, roleName);
+        ResponseEntity<ResponseObject> response = userService.updateUserRole(userId, roleName);
+        log.info("URL : {} , MethodType : {} , RequestParameter1 : {} , RequestParameter2 : {} ResponseBody {} ", "/api/admin/role/update", "PUT", userId, roleName, response);
+        return response;
     }
 
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{userId}/delete")
 /*
     @PreAuthorize("hasRole('ADMIN')")
 */
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
-        userService.deleteUserById(userId);
-        return ResponseEntity.ok("User Delete Successful.");
+    public ResponseEntity<ResponseObject> deleteUser(@PathVariable Long userId) {
+        log.info("URL : {} , MethodType , {} , PathVariable : {} ", "/api/admin/userId/delete", "DELETE", userId);
+        ResponseEntity<ResponseObject> response = userService.deleteUserById(userId);
+        log.info("URL : {} , MethodType : {} , PathVariable : {} , ResponseBody : {} ", "/api/admin/userId/delete", "DELETE", userId, response);
+        return response;
+
     }
 
 }

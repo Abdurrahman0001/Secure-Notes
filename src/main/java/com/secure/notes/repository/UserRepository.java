@@ -1,6 +1,6 @@
 package com.secure.notes.repository;
 
-import com.secure.notes.models.User;
+import com.secure.notes.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

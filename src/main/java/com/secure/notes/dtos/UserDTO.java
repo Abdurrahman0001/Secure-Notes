@@ -1,6 +1,6 @@
 package com.secure.notes.dtos;
 
-import com.secure.notes.models.Role;
+import com.secure.notes.entities.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

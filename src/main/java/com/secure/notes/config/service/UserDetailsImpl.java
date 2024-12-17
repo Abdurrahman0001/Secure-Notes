@@ -1,11 +1,9 @@
 package com.secure.notes.config.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.secure.notes.models.User;
+import com.secure.notes.entities.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.query.sql.internal.ParameterRecognizerImpl;
-import org.hibernate.sql.ast.tree.expression.Collation;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

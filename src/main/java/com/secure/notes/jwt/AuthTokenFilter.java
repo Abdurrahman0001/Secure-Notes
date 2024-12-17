@@ -7,11 +7,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
-import org.slf4j.LoggerFactory;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,21 +38,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         logger.debug("AuthenticationFilter called for URI: {}", request.getRequestURI());
 
-        String token = request.getHeader("Authorization").substring(7); // Remove "Bearer "
-/*
-
-        if (blacklistService.isTokenBlacklisted(token)) {
-            // Token is blacklisted; deny access
-           // throw new AccessDeniedException("Token is blacklisted; access denied.");
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        }
-*/
-
-
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != null && jwtUtils.validateJwtToken(jwt) && !jwtUtils.isBlacklisted(jwt)) {
                 String userNameFromJwtToken = jwtUtils.getUserNameFromJwtToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userNameFromJwtToken);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
